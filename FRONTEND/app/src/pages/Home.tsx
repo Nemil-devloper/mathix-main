@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Paper, Typography } from '@mui/material';
 import Navbar from '../components/Navbar'; // Use the existing Navbar component
-import OnlineImage from '../assets/online.avif';
+import OnlineImage from '../assets/online.png';
 import OfflineImage from '../assets/offline.jpg';
 import AiImage from '../assets/ai.jpg';
 import NotesImage from '../assets/notes.jpg';
