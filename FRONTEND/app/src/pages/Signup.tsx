@@ -18,7 +18,9 @@ function Signup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/auth/signup`, formData);
+      const apiUrl = `${API_BASE_URL}/api/auth/signup`;
+      console.log('Signup API URL:', apiUrl); // Debug: log the full URL
+      const res = await axios.post(apiUrl, formData);
       if (res.status === 201) {
         alert('Signup successful! Redirecting to login...');
         navigate('/login');

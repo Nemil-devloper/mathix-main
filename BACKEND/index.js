@@ -6,12 +6,24 @@ const dotenv = require('dotenv');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// Load backend-specific environment variables
-dotenv.config({ path: require('path').resolve(__dirname, './.env') });
+// Load backend-specific environment variables from backend/.env for local dev
+dotenv.config({ path: require('path').resolve(__dirname, '../backend/.env') });
 const app = express();
 
+// Allow CORS from your frontend domain
+const allowedOrigins = [
+  'http://localhost:5173', // Vite default
+  'http://localhost:3000', // React default
+  'https://mathix-main-voeg.vercel.app', // Your deployed Vercel frontend
+  'https://mathix-main.vercel.app', // (optional, if you use this)
+  'https://mathix-main.onrender.com', // Render frontend (if used)
+];
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
+
 // Middleware
-app.use(cors());
 app.use(express.json());
 
 // Suppress deprecation warnings
@@ -135,6 +147,11 @@ app.get('/api/dashboard', (req, res) => {
   } catch (err) {
     res.status(401).send({ message: 'Invalid token' });
   }
+});
+
+// 404 handler for unknown API routes
+app.use('/api', (req, res) => {
+  res.status(404).json({ message: 'API route not found' });
 });
 
 // ✅ Start Server
