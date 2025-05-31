@@ -43,13 +43,10 @@ function App() {
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          {/* Redirect root to login if not authenticated */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
 
           {/* Protected routes */}
-          <Route path="/" element={
-            <RequireAuth>
-              <Home />
-            </RequireAuth>
-          } />
           <Route path="/home" element={
             <RequireAuth>
               <Home />
