@@ -5,7 +5,8 @@ const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-dotenv.config({ path: require('path').resolve(__dirname, '../.env') }); // Load .env from project root
+// Load backend-specific environment variables
+dotenv.config({ path: require('path').resolve(__dirname, './.env') });
 const app = express();
 
 // Middleware
