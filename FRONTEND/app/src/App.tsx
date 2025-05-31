@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Box } from '@mui/material'; // Import Box from MUI
 import Login from './pages/Login';
 import Signup from './pages/Signup'; // Import the Signup page
@@ -18,6 +18,17 @@ import AIPage from './pages/AIPage'; // Import AIPage
 import Chatbot from './pages/Chatbot'; // Import Chatbot
 import AIRecommendation from './pages/AIRecommendation'; // Import AIRecommendation
 
+// Auth wrapper for protected routes
+function RequireAuth({ children }: { children: JSX.Element }) {
+  const token = localStorage.getItem('token');
+  const location = useLocation();
+  if (!token) {
+    // If not authenticated, redirect to login, preserving the intended path
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  return children;
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -29,24 +40,91 @@ function App() {
         }}
       >
         <Routes>
-          <Route path="/" element={<Home />} />
+          {/* Public routes */}
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} /> {/* Add route for Signup */}
-          <Route path="/home" element={<Home />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/roadmap" element={<Roadmap />} />
-          <Route path="/journey" element={<Journey />} />
-          <Route path="/motivation" element={<Motivation />} />
-          <Route path="/friend" element={<Friends />} /> {/* Add route for Friends */}
-          <Route path="/quiz" element={<Game />} />
-          <Route path="/setting" element={<Settings />} />
-          <Route path="/contact" element={<ContactUs />} />
-          <Route path="/online" element={<Online />} />
-          <Route path="/offline" element={<Offline />} />
-          <Route path="/notes" element={<Notes />} /> {/* Add route for Notes */}
-          <Route path="/AIPage" element={<AIPage />} /> {/* Route for AIPage */}
-          <Route path="/chatbot" element={<Chatbot />} /> {/* Route for Chatbot */}
-          <Route path="/ai-recommendation" element={<AIRecommendation />} /> {/* Route for AIRecommendation */}
+          <Route path="/signup" element={<Signup />} />
+
+          {/* Protected routes */}
+          <Route path="/" element={
+            <RequireAuth>
+              <Home />
+            </RequireAuth>
+          } />
+          <Route path="/home" element={
+            <RequireAuth>
+              <Home />
+            </RequireAuth>
+          } />
+          <Route path="/profile" element={
+            <RequireAuth>
+              <Profile />
+            </RequireAuth>
+          } />
+          <Route path="/roadmap" element={
+            <RequireAuth>
+              <Roadmap />
+            </RequireAuth>
+          } />
+          <Route path="/journey" element={
+            <RequireAuth>
+              <Journey />
+            </RequireAuth>
+          } />
+          <Route path="/motivation" element={
+            <RequireAuth>
+              <Motivation />
+            </RequireAuth>
+          } />
+          <Route path="/friend" element={
+            <RequireAuth>
+              <Friends />
+            </RequireAuth>
+          } />
+          <Route path="/quiz" element={
+            <RequireAuth>
+              <Game />
+            </RequireAuth>
+          } />
+          <Route path="/setting" element={
+            <RequireAuth>
+              <Settings />
+            </RequireAuth>
+          } />
+          <Route path="/contact" element={
+            <RequireAuth>
+              <ContactUs />
+            </RequireAuth>
+          } />
+          <Route path="/online" element={
+            <RequireAuth>
+              <Online />
+            </RequireAuth>
+          } />
+          <Route path="/offline" element={
+            <RequireAuth>
+              <Offline />
+            </RequireAuth>
+          } />
+          <Route path="/notes" element={
+            <RequireAuth>
+              <Notes />
+            </RequireAuth>
+          } />
+          <Route path="/AIPage" element={
+            <RequireAuth>
+              <AIPage />
+            </RequireAuth>
+          } />
+          <Route path="/chatbot" element={
+            <RequireAuth>
+              <Chatbot />
+            </RequireAuth>
+          } />
+          <Route path="/ai-recommendation" element={
+            <RequireAuth>
+              <AIRecommendation />
+            </RequireAuth>
+          } />
         </Routes>
       </Box>
     </BrowserRouter>
