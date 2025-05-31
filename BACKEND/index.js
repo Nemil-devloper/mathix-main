@@ -2,7 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const bcrypt = require('bcrypt');
+// Replace bcrypt with bcryptjs for Render compatibility
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 // Load backend-specific environment variables
