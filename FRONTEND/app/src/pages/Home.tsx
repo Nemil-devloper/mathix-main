@@ -4,7 +4,7 @@ import { Box, Paper, Typography } from '@mui/material';
 import Navbar from '../components/Navbar'; // Use the existing Navbar component
 import OnlineImage from '../assets/online.avif';
 import OfflineImage from '../assets/offline.jpg';
-import AiImage from '../assets/AI.avif';
+import AiImage from '../assets/ai.jpg';
 import NotesImage from '../assets/notes.jpg';
 import BackgroundImage from '../assets/bg.jpg';
 
