@@ -23,7 +23,9 @@ function Login() {
     setError('');
 
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/auth/login`, formData);
+      const apiUrl = `${API_BASE_URL}/api/auth/login`;
+      console.log('Login API URL:', apiUrl); // Debug: log the full URL
+      const res = await axios.post(apiUrl, formData);
       
       if (res.data.token) {
         localStorage.setItem('token', res.data.token);
