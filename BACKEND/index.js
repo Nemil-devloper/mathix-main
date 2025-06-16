@@ -6,8 +6,10 @@ const dotenv = require('dotenv');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// Load backend-specific environment variables from backend/.env for local dev
-dotenv.config({ path: require('path').resolve(__dirname, '../backend/.env') });
+// Load .env file only in local development
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: require('path').resolve(__dirname, '../backend/.env') });
+}
 const app = express();
 
 // Allow CORS from your frontend domain

@@ -17,6 +17,7 @@ import Notes from './pages/Notes'; // Import the Notes page
 import AIPage from './pages/AIPage'; // Import AIPage
 import Chatbot from './pages/Chatbot'; // Import Chatbot
 import AIRecommendation from './pages/AIRecommendation'; // Import AIRecommendation
+import { JSX } from 'react';
 
 // Auth wrapper for protected routes
 function RequireAuth({ children }: { children: JSX.Element }) {
