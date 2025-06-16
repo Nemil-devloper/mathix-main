@@ -3,18 +3,20 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 
-// Load .env file only in local development
-if (process.env.NODE_ENV !== 'production') {
-  dotenv.config({ path: require('path').resolve(__dirname, '../backend/.env') });
-}
+// Load environment variables
+dotenv.config();
+
+// Set default values for development
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mathix';
+const SECRET_KEY = process.env.SECRET_KEY || 'mathix_secret_key_2024';
 
 // Check required environment variables
-if (!process.env.MONGO_URI) {
+if (!MONGO_URI) {
   console.error('❌ MONGO_URI is not defined in environment variables');
   process.exit(1);
 }
 
-if (!process.env.SECRET_KEY) {
+if (!SECRET_KEY) {
   console.error('❌ SECRET_KEY is not defined in environment variables');
   process.exit(1);
 }
@@ -42,9 +44,9 @@ mongoose.set('strictQuery', true);
 
 // Connect to MongoDB with better error handling
 // Always use the URI from the common .env file (Atlas or local)
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(MONGO_URI)
   .then(() => {
-    console.log('✅ Connected to MongoDB:', process.env.MONGO_URI);
+    console.log('✅ Connected to MongoDB');
   })
   .catch(err => {
     console.error('❌ MongoDB connection error:', err.message);
@@ -102,7 +104,7 @@ app.post('/api/auth/login', async (req, res) => {
 
     const token = jwt.sign(
       { id: user._id, email: user.email, username: user.username },
-      process.env.SECRET_KEY,
+      SECRET_KEY,
       { expiresIn: '1h' }
     );
 
@@ -123,7 +125,7 @@ app.get('/api/auth/profile', async (req, res) => {
   if (!token) return res.status(401).send({ message: 'Unauthorized' });
 
   try {
-    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    const decoded = jwt.verify(token, SECRET_KEY);
     const user = await User.findById(decoded.id).select('-password');
     if (!user) return res.status(404).send({ message: 'User not found' });
 
@@ -142,7 +144,7 @@ app.get('/api/dashboard', (req, res) => {
 
   const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    const decoded = jwt.verify(token, SECRET_KEY);
     res.send({ message: `Welcome to the dashboard, ${decoded.username}!` });
   } catch (err) {
     res.status(401).send({ message: 'Invalid token' });
