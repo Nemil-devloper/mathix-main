@@ -10,6 +10,18 @@ const jwt = require('jsonwebtoken');
 if (process.env.NODE_ENV !== 'production') {
   dotenv.config({ path: require('path').resolve(__dirname, '../backend/.env') });
 }
+
+// Check required environment variables
+if (!process.env.MONGO_URI) {
+  console.error('❌ MONGO_URI is not defined in environment variables');
+  process.exit(1);
+}
+
+if (!process.env.SECRET_KEY) {
+  console.error('❌ SECRET_KEY is not defined in environment variables');
+  process.exit(1);
+}
+
 const app = express();
 
 // Allow CORS from your frontend domain
@@ -30,17 +42,6 @@ app.use(express.json());
 
 // Suppress deprecation warnings
 mongoose.set('strictQuery', true);
-
-// Check required environment variables
-if (!process.env.MONGO_URI) {
-  console.error('❌ MONGO_URI is not defined in .env file');
-  process.exit(1);
-}
-
-if (!process.env.SECRET_KEY) {
-  console.error('❌ SECRET_KEY is not defined in .env file');
-  process.exit(1);
-}
 
 // Connect to MongoDB with better error handling
 // Always use the URI from the common .env file (Atlas or local)
