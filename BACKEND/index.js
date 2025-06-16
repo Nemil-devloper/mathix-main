@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 // Load environment variables
 dotenv.config();
@@ -43,13 +45,17 @@ app.use(express.json());
 mongoose.set('strictQuery', true);
 
 // Connect to MongoDB with better error handling
-// Always use the URI from the common .env file (Atlas or local)
-mongoose.connect(MONGO_URI)
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
   .then(() => {
     console.log('✅ Connected to MongoDB');
+    console.log('Connection URI:', MONGO_URI.replace(/\/\/[^:]+:[^@]+@/, '//****:****@')); // Hide credentials
   })
   .catch(err => {
     console.error('❌ MongoDB connection error:', err.message);
+    console.error('Full error:', err);
     process.exit(1);
   });
 
