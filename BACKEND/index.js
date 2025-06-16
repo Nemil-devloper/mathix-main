@@ -2,9 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
-// Replace bcrypt with bcryptjs for Render compatibility
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 
 // Load .env file only in local development
 if (process.env.NODE_ENV !== 'production') {
