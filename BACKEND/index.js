@@ -8,8 +8,8 @@ const jwt = require('jsonwebtoken');
 // Load environment variables
 dotenv.config();
 
-// Set default values for development
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mathix';
+// Set MongoDB Atlas URI
+const MONGO_URI = process.env.MONGO_URI;
 const SECRET_KEY = process.env.SECRET_KEY || 'mathix_secret_key_2024';
 
 // Check required environment variables
@@ -44,18 +44,16 @@ app.use(express.json());
 // Suppress deprecation warnings
 mongoose.set('strictQuery', true);
 
-// Connect to MongoDB with better error handling
+// Connect to MongoDB Atlas
 mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
   .then(() => {
-    console.log('✅ Connected to MongoDB');
-    console.log('Connection URI:', MONGO_URI.replace(/\/\/[^:]+:[^@]+@/, '//****:****@')); // Hide credentials
+    console.log('✅ Connected to MongoDB Atlas');
   })
   .catch(err => {
-    console.error('❌ MongoDB connection error:', err.message);
-    console.error('Full error:', err);
+    console.error('❌ MongoDB Atlas connection error:', err.message);
     process.exit(1);
   });
 
