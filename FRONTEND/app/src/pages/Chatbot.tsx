@@ -1,8 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, TextField, Button, Select, MenuItem, SelectChangeEvent } from '@mui/material';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  useMediaQuery,
+} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import ReactMarkdown from 'react-markdown'; // Import ReactMarkdown
+import ReactMarkdown from 'react-markdown';
+import 'katex/dist/katex.min.css';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
 
 // Extend the Window interface to include SpeechRecognition
 declare global {
@@ -26,6 +38,7 @@ const Chatbot: React.FC = () => {
   const [language, setLanguage] = useState<string>('en-US');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [username, setUsername] = useState('');
+  const isMobile = useMediaQuery('(max-width:600px)');
 
   useEffect(() => {
     setUsername(localStorage.getItem('username') || '');
@@ -163,7 +176,7 @@ If a student types a topic like integration, provide an overview, key rules, and
     >
       <Navbar
         username={username}
-        navigate={handleNavigate} // Pass the updated handleNavigate function
+        navigate={handleNavigate}
         onLogout={handleLogout}
         onProfileClick={handleProfileClick}
       />
@@ -173,31 +186,31 @@ If a student types a topic like integration, provide an overview, key rules, and
           display: 'flex',
           flexDirection: 'column',
           backgroundColor: '#444654',
-          marginTop: '64px',
+          marginTop: { xs: '56px', sm: '64px', md: '64px' },
           overflow: 'hidden',
         }}
       >
         <Box
           sx={{
             flex: 1,
-            padding: 2,
+            padding: { xs: 1, sm: 2 },
             overflowY: 'auto',
             display: 'flex',
             flexDirection: 'column',
             gap: 2,
             '&::-webkit-scrollbar': {
-              width: '8px', // Narrow scrollbar width
+              width: '8px',
             },
             '&::-webkit-scrollbar-track': {
-              background: '#2c2f33', // Dark track background
-              borderRadius: '10px', // Rounded track edges
+              background: '#2c2f33',
+              borderRadius: '10px',
             },
             '&::-webkit-scrollbar-thumb': {
-              background: 'linear-gradient(45deg, #00ffcc, #0066ff)', // Gradient thumb for a futuristic look
-              borderRadius: '10px', // Rounded thumb edges
+              background: 'linear-gradient(45deg, #00ffcc, #0066ff)',
+              borderRadius: '10px',
             },
             '&::-webkit-scrollbar-thumb:hover': {
-              background: 'linear-gradient(45deg, #00cc99, #0044cc)', // Slightly darker gradient on hover
+              background: 'linear-gradient(45deg, #00cc99, #0044cc)',
             },
           }}
         >
@@ -206,11 +219,16 @@ If a student types a topic like integration, provide an overview, key rules, and
               key={index}
               sx={{
                 alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
-                background: msg.sender === 'user' ? 'linear-gradient(135deg, #007bff, #0056b3)' : '#f1f1f1',
+                background: msg.sender === 'user'
+                  ? 'linear-gradient(135deg, #007bff, #0056b3)'
+                  : '#f1f1f1',
                 color: msg.sender === 'user' ? 'white' : 'black',
-                padding: '8px 12px',
-                borderRadius: msg.sender === 'user' ? '12px 12px 0 12px' : '12px 12px 12px 0',
-                maxWidth: '70%',
+                padding: { xs: '6px 8px', sm: '8px 12px' },
+                borderRadius: msg.sender === 'user'
+                  ? { xs: '10px 10px 0 10px', sm: '12px 12px 0 12px' }
+                  : { xs: '10px 10px 10px 0', sm: '12px 12px 12px 0' },
+                maxWidth: { xs: '90%', sm: '70%' },
+                fontSize: { xs: '0.95rem', sm: '1rem' },
                 wordWrap: 'break-word',
                 whiteSpace: 'pre-wrap',
                 boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
@@ -218,11 +236,27 @@ If a student types a topic like integration, provide an overview, key rules, and
               }}
             >
               {msg.sender === 'ai' ? (
-                <ReactMarkdown>{msg.content}</ReactMarkdown> // Render markdown for AI responses
+                <ReactMarkdown
+                  remarkPlugins={[remarkMath]}
+                  rehypePlugins={[rehypeKatex]}
+                  components={{
+                    // Optionally, you can style math blocks here
+                  }}
+                >
+                  {msg.content}
+                </ReactMarkdown>
               ) : (
                 <Typography variant="body2">{msg.content}</Typography>
               )}
-              <Typography variant="caption" sx={{ display: 'block', textAlign: 'right', color: '#9ca3af' }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  display: 'block',
+                  textAlign: 'right',
+                  color: '#9ca3af',
+                  fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                }}
+              >
                 {msg.timestamp}
               </Typography>
             </Box>
@@ -231,17 +265,25 @@ If a student types a topic like integration, provide an overview, key rules, and
         </Box>
         <Box
           sx={{
-            padding: 2,
+            padding: { xs: 1, sm: 2 },
             backgroundColor: '#40414f',
             display: 'flex',
-            gap: 2,
-            alignItems: 'center',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: { xs: 1, sm: 2 },
+            alignItems: { xs: 'stretch', sm: 'center' },
           }}
         >
           <Select
             value={language}
             onChange={handleLanguageChange}
-            sx={{ color: '#d1d5db', backgroundColor: '#555770', borderRadius: 1 }}
+            sx={{
+              color: '#d1d5db',
+              backgroundColor: '#555770',
+              borderRadius: 1,
+              fontSize: { xs: '0.95rem', sm: '1rem' },
+              minWidth: { xs: 100, sm: 120 },
+              mb: { xs: 1, sm: 0 },
+            }}
           >
             <MenuItem value="en-US">English</MenuItem>
             <MenuItem value="hi-IN">Hindi</MenuItem>
@@ -259,30 +301,36 @@ If a student types a topic like integration, provide an overview, key rules, and
             sx={{
               backgroundColor: '#555770',
               borderRadius: 1,
-              input: { color: '#d1d5db' },
+              input: { color: '#d1d5db', fontSize: { xs: '0.95rem', sm: '1rem' } },
             }}
           />
-          <Button
-            variant="contained"
-            onClick={handleSend}
-            sx={{
-              backgroundColor: '#10a37f',
-              color: 'white',
-              '&:hover': { backgroundColor: '#0e8c6c' },
-            }}
-          >
-            Send
-          </Button>
-          <Button
-            onClick={startVoiceRecognition}
-            sx={{
-              backgroundColor: isListening ? '#ff5722' : '#3f51b5',
-              color: 'white',
-              '&:hover': { backgroundColor: isListening ? '#e64a19' : '#303f9f' },
-            }}
-          >
-            {isListening ? 'Listening...' : '🎤'}
-          </Button>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'row', sm: 'row' }, gap: 1, mt: { xs: 1, sm: 0 } }}>
+            <Button
+              variant="contained"
+              onClick={handleSend}
+              sx={{
+                backgroundColor: '#10a37f',
+                color: 'white',
+                fontSize: { xs: '0.95rem', sm: '1rem' },
+                minWidth: { xs: 70, sm: 90 },
+                '&:hover': { backgroundColor: '#0e8c6c' },
+              }}
+            >
+              Send
+            </Button>
+            <Button
+              onClick={startVoiceRecognition}
+              sx={{
+                backgroundColor: isListening ? '#ff5722' : '#3f51b5',
+                color: 'white',
+                fontSize: { xs: '0.95rem', sm: '1rem' },
+                minWidth: { xs: 70, sm: 90 },
+                '&:hover': { backgroundColor: isListening ? '#e64a19' : '#303f9f' },
+              }}
+            >
+              {isListening ? 'Listening...' : '🎤'}
+            </Button>
+          </Box>
         </Box>
       </Box>
     </Box>

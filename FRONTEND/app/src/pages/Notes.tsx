@@ -12,6 +12,7 @@ import {
   Tooltip,
   Switch,
   Checkbox,
+  useMediaQuery,
 } from '@mui/material';
 import {
   ExpandMore,
@@ -25,6 +26,10 @@ import {
 } from '@mui/icons-material';
 import Navbar from '../components/Navbar';
 import { useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import 'katex/dist/katex.min.css';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
 
 const Notes: React.FC = () => {
   const navigate = useNavigate();
@@ -110,23 +115,30 @@ const Notes: React.FC = () => {
     if (activeTopic) localStorage.setItem('lastOpenedTopic', activeTopic);
   }, [activeTopic]);
 
+  const isMobile = useMediaQuery('(max-width:600px)');
+
   return (
     <Box
       sx={{
         display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
         height: '100vh',
         backgroundColor: darkMode ? '#121212' : '#f5f5f5',
         color: darkMode ? '#ffffff' : '#000000',
-        marginTop: '64px', // Add margin to account for Navbar height
+        marginTop: { xs: '56px', sm: '64px', md: '64px' },
       }}
     >
       {/* Left Panel: Topic Navigator */}
       <Box
         sx={{
-          width: '30%',
-          padding: 2,
+          width: { xs: '100%', md: '30%' },
+          minWidth: 0,
+          padding: { xs: 1, sm: 2 },
           backgroundColor: darkMode ? '#1e1e1e' : '#ffffff',
-          borderRight: `1px solid ${darkMode ? '#333333' : '#dddddd'}`,
+          borderRight: { xs: 'none', md: `1px solid ${darkMode ? '#333333' : '#dddddd'}` },
+          borderBottom: { xs: `1px solid ${darkMode ? '#333333' : '#dddddd'}`, md: 'none' },
+          overflowY: 'auto',
+          maxHeight: { xs: 'auto', md: '100vh' },
         }}
       >
         <Navbar username={username} navigate={navigate} onLogout={() => navigate('/login')} onProfileClick={function (): void {
@@ -146,6 +158,7 @@ const Notes: React.FC = () => {
               backgroundColor: darkMode ? '#333333' : '#f0f0f0',
               borderRadius: 1,
               color: darkMode ? '#ffffff' : '#000000',
+              fontSize: { xs: '0.95rem', sm: '1rem' },
             }}
           />
         </Box>
@@ -157,6 +170,8 @@ const Notes: React.FC = () => {
               backgroundColor: activeSection === 'notes' ? '#FFDD57' : 'transparent',
               color: activeSection === 'notes' ? 'black' : '#FFDD57',
               '&:hover': { backgroundColor: '#FFC107' },
+              fontSize: { xs: '0.95rem', sm: '1rem' },
+              minWidth: { xs: 80, sm: 100 },
             }}
           >
             Notes
@@ -168,6 +183,8 @@ const Notes: React.FC = () => {
               backgroundColor: activeSection === 'pyq' ? '#FFDD57' : 'transparent',
               color: activeSection === 'pyq' ? 'black' : '#FFDD57',
               '&:hover': { backgroundColor: '#FFC107' },
+              fontSize: { xs: '0.95rem', sm: '1rem' },
+              minWidth: { xs: 80, sm: 100 },
             }}
           >
             PYQ
@@ -176,7 +193,7 @@ const Notes: React.FC = () => {
         {filteredTopics.map((topic, index) => (
           <Accordion key={index} sx={{ backgroundColor: darkMode ? '#2c2c2c' : '#f9f9f9' }}>
             <AccordionSummary expandIcon={<ExpandMore />}>
-              <Typography>{topic.subject}</Typography>
+              <Typography sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }}>{topic.subject}</Typography>
             </AccordionSummary>
             <AccordionDetails>
               {topic.chapters.map((chapter) => (
@@ -193,8 +210,9 @@ const Notes: React.FC = () => {
                     sx={{
                       cursor: 'pointer',
                       textDecoration: activeTopic === chapter ? 'underline' : 'none',
-                      color: darkMode ? '#ffffff' : '#000000', // Ensure white in dark mode, black in light mode
-                      transition: 'color 0.3s ease', // Smooth transition for color change
+                      color: darkMode ? '#ffffff' : '#000000',
+                      transition: 'color 0.3s ease',
+                      fontSize: { xs: '0.95rem', sm: '1rem' },
                     }}
                     onClick={() => setActiveTopic(chapter)}
                   >
@@ -225,8 +243,8 @@ const Notes: React.FC = () => {
       {/* Right Panel: Content Viewer */}
       <Box
         sx={{
-          width: '70%',
-          padding: 3,
+          width: { xs: '100%', md: '70%' },
+          padding: { xs: 1, sm: 2, md: 3 },
           overflowY: 'auto',
           position: 'relative',
           backgroundColor: darkMode ? '#1e1e1e' : '#ffffff',
@@ -234,8 +252,14 @@ const Notes: React.FC = () => {
       >
         {activeSection === 'notes' && activeTopic ? (
           <>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+            <Box sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              justifyContent: 'space-between',
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              gap: { xs: 1, sm: 0 }
+            }}>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', fontSize: { xs: '1.2rem', sm: '1.5rem' } }}>
                 {activeTopic}
               </Typography>
               <Box>
@@ -259,21 +283,41 @@ const Notes: React.FC = () => {
             <Paper
               elevation={3}
               sx={{
-                padding: 3,
+                padding: { xs: 1.5, sm: 3 },
                 backgroundColor: darkMode ? '#2c2c2c' : '#f9f9f9',
                 color: darkMode ? '#ffffff' : '#000000',
+                fontSize: { xs: '0.98rem', sm: '1.1rem' },
+                overflowX: 'auto',
               }}
             >
-              <Typography>{notes[activeTopic]?.content || 'No content available.'}</Typography>
+              <ReactMarkdown
+                remarkPlugins={[remarkMath]}
+                rehypePlugins={[rehypeKatex]}
+                components={{
+                  p: ({ node, ...props }) => (
+                    <Typography
+                      sx={{
+                        fontSize: { xs: '0.98rem', sm: '1.1rem' },
+                        color: darkMode ? '#fff' : '#000',
+                        wordBreak: 'break-word',
+                      }}
+                      {...props}
+                    />
+                  ),
+                }}
+              >
+                {notes[activeTopic]?.content || 'No content available.'}
+              </ReactMarkdown>
             </Paper>
-            <Box sx={{ marginTop: 2, display: 'flex', gap: 2 }}>
-              <Button variant="contained" color="primary">
+            <Box sx={{ marginTop: 2, display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+              <Button variant="contained" color="primary" sx={{ fontSize: { xs: '0.95rem', sm: '1rem' } }}>
                 Download PDF
               </Button>
               <Button
                 variant="outlined"
                 color="secondary"
                 onClick={() => handleMarkComplete(activeTopic)}
+                sx={{ fontSize: { xs: '0.95rem', sm: '1rem' } }}
               >
                 {completedTopics.includes(activeTopic) ? 'Mark as Incomplete' : 'Mark as Complete'}
               </Button>
@@ -281,7 +325,7 @@ const Notes: React.FC = () => {
           </>
         ) : activeSection === 'pyq' && activeTopic ? (
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', marginBottom: 2 }}>
+            <Typography variant="h4" sx={{ fontWeight: 'bold', marginBottom: 2, fontSize: { xs: '1.2rem', sm: '1.5rem' } }}>
               Previous Year Questions: {activeTopic}
             </Typography>
             {pyq[activeTopic]?.map((question, index) => (
@@ -289,24 +333,43 @@ const Notes: React.FC = () => {
                 key={index}
                 elevation={2}
                 sx={{
-                  padding: 2,
+                  padding: { xs: 1.5, sm: 2 },
                   marginBottom: 2,
                   borderRadius: 2,
                   backgroundColor: darkMode ? '#2c2c2c' : '#f9f9f9',
                   color: darkMode ? '#ffffff' : '#000000',
+                  fontSize: { xs: '0.98rem', sm: '1.1rem' },
+                  overflowX: 'auto',
                 }}
               >
-                <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: 1 }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: 1, fontSize: { xs: '1rem', sm: '1.2rem' } }}>
                   {index + 1}. {question.question}
                 </Typography>
-                <Typography variant="body1">{question.answer}</Typography>
+                <ReactMarkdown
+                  remarkPlugins={[remarkMath]}
+                  rehypePlugins={[rehypeKatex]}
+                  components={{
+                    p: ({ node, ...props }) => (
+                      <Typography
+                        sx={{
+                          fontSize: { xs: '0.98rem', sm: '1.1rem' },
+                          color: darkMode ? '#fff' : '#000',
+                          wordBreak: 'break-word',
+                        }}
+                        {...props}
+                      />
+                    ),
+                  }}
+                >
+                  {question.answer}
+                </ReactMarkdown>
               </Paper>
             )) || (
               <Typography variant="body1">No questions available for this topic.</Typography>
             )}
           </Box>
         ) : (
-          <Typography variant="h5" sx={{ textAlign: 'center', marginTop: '20%' }}>
+          <Typography variant="h5" sx={{ textAlign: 'center', marginTop: '20%', fontSize: { xs: '1.1rem', sm: '1.3rem' } }}>
             Select a topic to view content.
           </Typography>
         )}

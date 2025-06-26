@@ -10,6 +10,8 @@ import {
   Modal,
   Select,
   MenuItem,
+  useMediaQuery,
+  Paper,
 } from '@mui/material';
 import Navbar from '../components/Navbar';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +19,9 @@ import 'katex/dist/katex.min.css';
 import katex from 'katex';
 
 const renderMath = (expression: string) => {
-  return { __html: katex.renderToString(expression, { throwOnError: false }) };
+  // Remove \\( and \\) or $$ for dynamic rendering
+  const clean = expression.replace(/\\\(|\\\)|\$\$/g, '');
+  return { __html: katex.renderToString(clean, { throwOnError: false }) };
 };
 
 const mockQuizData = [
@@ -50,6 +54,8 @@ const Game: React.FC = () => {
   const [difficulty, setDifficulty] = useState('Easy');
   const [timer, setTimer] = useState(300); // 5 minutes
   const [username, setUsername] = useState('');
+  const [showAnswers, setShowAnswers] = useState(false);
+  const isMobile = useMediaQuery('(max-width:600px)');
 
   const currentQuestion = mockQuizData[currentQuestionIndex];
 
@@ -58,11 +64,13 @@ const Game: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    if (timer === 0) setShowModal(true);
+    if (showModal) return;
     const countdown = setInterval(() => {
       setTimer((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
     return () => clearInterval(countdown);
-  }, []);
+  }, [timer, showModal]);
 
   const handleLogout = (): void => {
     localStorage.removeItem('token');
@@ -96,6 +104,8 @@ const Game: React.FC = () => {
     }
   };
 
+  const handleShowAnswers = () => setShowAnswers((prev) => !prev);
+
   const progress = ((currentQuestionIndex + 1) / mockQuizData.length) * 100;
 
   return (
@@ -104,30 +114,40 @@ const Game: React.FC = () => {
         width: '100vw',
         height: '100vh',
         display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
         background: 'linear-gradient(to right, #0f2027, #203a43, #2c5364)',
         color: 'white',
         overflow: 'hidden',
       }}
     >
-      {/* Right Panel: Quiz Overview */}
+      {/* Top Navbar for mobile */}
+      {isMobile && (
+        <Box sx={{ width: '100%', position: 'fixed', top: 0, zIndex: 10 }}>
+          <Navbar username={username} navigate={navigate} onLogout={handleLogout} onProfileClick={() => {}} />
+        </Box>
+      )}
+
+      {/* Quiz Overview Panel */}
       <Box
         sx={{
-          width: '30%',
-          height: '92vh', // Adjust height to account for Navbar
-          position: 'sticky',
-          top: '8vh', // Offset by Navbar height
+          width: { xs: '100%', md: '30%' },
+          minWidth: 0,
+          height: { xs: 'auto', md: '92vh' },
+          position: { xs: 'static', md: 'sticky' },
+          top: { md: '8vh' },
           background: 'linear-gradient(to bottom, #1c1c1c, #2c3e50)',
-          padding: 3,
-          marginTop: 4, // Increase margin-top for better spacing
-          overflowY: 'auto', // Enable scrolling for the right panel
-          boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.5)',
+          padding: { xs: 1, sm: 2, md: 3 },
+          marginTop: { xs: isMobile ? '56px' : 0, md: 4 },
+          overflowY: 'auto',
+          boxShadow: { xs: 'none', md: '0px 0px 15px rgba(0, 0, 0, 0.5)' },
+          zIndex: 2,
         }}
       >
-        <Navbar username={username} navigate={navigate} onLogout={handleLogout} onProfileClick={function (): void {
-          throw new Error('Function not implemented.');
-        } } />
-        <Divider sx={{ marginY: 3, backgroundColor: '#ffffff' }} /> {/* Increase vertical spacing */}
-        <Typography variant="h6" sx={{ marginBottom: 3, fontWeight: 'bold', color: '#00e6e6' }}>
+        {!isMobile && (
+          <Navbar username={username} navigate={navigate} onLogout={handleLogout} onProfileClick={() => {}} />
+        )}
+        <Divider sx={{ marginY: { xs: 2, md: 3 }, backgroundColor: '#ffffff' }} />
+        <Typography variant="h6" sx={{ marginBottom: 2, fontWeight: 'bold', color: '#00e6e6', fontSize: { xs: '1rem', sm: '1.1rem' } }}>
           Quiz Overview
         </Typography>
         <List>
@@ -137,11 +157,11 @@ const Game: React.FC = () => {
               sx={{
                 backgroundColor: quizAnswers[question.id]
                   ? quizResults[question.id] === true
-                    ? '#28a745' // Green for correct answers
-                    : '#ffffff' // White for incorrect answers
-                  : '#ffc107', // Yellow for unanswered questions
-                color: quizResults[question.id] === false ? 'black' : 'white', // Ensure text color is black for white background
-                marginBottom: 2, // Increase spacing between list items
+                    ? '#28a745'
+                    : '#ffffff'
+                  : '#ffc107',
+                color: quizResults[question.id] === false ? 'black' : 'white',
+                marginBottom: 2,
                 borderRadius: 2,
                 cursor: 'pointer',
                 transition: 'transform 0.2s, box-shadow 0.2s',
@@ -149,6 +169,8 @@ const Game: React.FC = () => {
                   transform: 'scale(1.05)',
                   boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.3)',
                 },
+                fontSize: { xs: '0.95rem', sm: '1rem' },
+                px: { xs: 1, sm: 2 },
               }}
               onClick={() => setCurrentQuestionIndex(index)}
             >
@@ -156,7 +178,8 @@ const Game: React.FC = () => {
                 variant="body1"
                 sx={{
                   fontWeight: 'bold',
-                  color: quizResults[question.id] === false ? 'black' : 'white', // Ensure consistent text color
+                  color: quizResults[question.id] === false ? 'black' : 'white',
+                  fontSize: { xs: '0.95rem', sm: '1rem' },
                 }}
               >
                 Question {index + 1}
@@ -164,11 +187,11 @@ const Game: React.FC = () => {
             </ListItem>
           ))}
         </List>
-        <Divider sx={{ marginY: 3, backgroundColor: '#ffffff' }} /> {/* Increase vertical spacing */}
-        <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#00e6e6', marginBottom: 2 }}>
-          Timer: {Math.floor(timer / 60)}:{timer % 60}
+        <Divider sx={{ marginY: { xs: 2, md: 3 }, backgroundColor: '#ffffff' }} />
+        <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#00e6e6', marginBottom: 2, fontSize: { xs: '1rem', sm: '1.1rem' } }}>
+          Timer: {Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}
         </Typography>
-        <Typography variant="h6" sx={{ marginTop: 3, fontWeight: 'bold', color: '#00e6e6' }}>
+        <Typography variant="h6" sx={{ marginTop: 2, fontWeight: 'bold', color: '#00e6e6', fontSize: { xs: '1rem', sm: '1.1rem' } }}>
           Difficulty:
         </Typography>
         <Select
@@ -177,8 +200,10 @@ const Game: React.FC = () => {
           sx={{
             backgroundColor: 'white',
             color: 'black',
-            marginTop: 2, // Increase spacing above the dropdown
+            marginTop: 1,
             borderRadius: 2,
+            fontSize: { xs: '0.95rem', sm: '1rem' },
+            width: { xs: '100%', sm: 'auto' },
             '&:hover': { backgroundColor: '#f0f0f0' },
           }}
         >
@@ -186,44 +211,61 @@ const Game: React.FC = () => {
           <MenuItem value="Medium">Medium</MenuItem>
           <MenuItem value="Hard">Hard</MenuItem>
         </Select>
+        <Button
+          variant="outlined"
+          onClick={handleShowAnswers}
+          sx={{
+            mt: 2,
+            color: '#00e6e6',
+            borderColor: '#00e6e6',
+            fontSize: { xs: '0.95rem', sm: '1rem' },
+            width: { xs: '100%', sm: 'auto' },
+          }}
+        >
+          {showAnswers ? 'Hide Answers' : 'Show Answers'}
+        </Button>
       </Box>
 
-      {/* Left Panel: Quiz Content */}
+      {/* Quiz Content Panel */}
       <Box
         sx={{
-          width: '70%',
-          height: '92vh', // Adjust height to account for Navbar
-          padding: 4,
-          marginTop: 4, // Increase margin-top for better spacing
+          width: { xs: '100%', md: '70%' },
+          minWidth: 0,
+          height: { xs: 'auto', md: '92vh' },
+          padding: { xs: 1, sm: 2, md: 4 },
+          marginTop: { xs: isMobile ? '56px' : 0, md: 4 },
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'space-between',
-          overflowY: 'auto',// Enable scrolling for the left panel
+          justifyContent: 'flex-start',
+          overflowY: 'auto',
+          zIndex: 1,
         }}
       >
-        <div
-          style={{
-            padding: '20px',
-            borderRadius: '12px',
+        <Paper
+          sx={{
+            padding: { xs: 1, sm: 2, md: 3 },
+            borderRadius: 2,
             background: 'linear-gradient(to right, #2c5364, #0f2027)',
             color: 'white',
             boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.5)',
-            marginBottom: '20px',
+            marginBottom: { xs: 2, md: 3 },
           }}
         >
-          <div style={{ marginBottom: '20px', fontWeight: 'bold', color: '#00e6e6', fontSize: '20px' }}>
+          <Box sx={{ marginBottom: { xs: 2, md: 3 }, fontWeight: 'bold', color: '#00e6e6', fontSize: { xs: '1rem', sm: '1.2rem' } }}>
             Question {currentQuestionIndex + 1} of {mockQuizData.length}
-          </div>
-          <div
-            style={{
-              marginBottom: '20px',
-              fontSize: '18px',
+          </Box>
+          <Box
+            sx={{
+              marginBottom: { xs: 2, md: 3 },
+              fontSize: { xs: '1rem', sm: '1.15rem' },
               fontWeight: 'bold',
-              color: '#ffff99', // Light yellow color for the question text
+              color: '#ffff99',
+              wordBreak: 'break-word',
+              overflowX: 'auto',
             }}
             dangerouslySetInnerHTML={renderMath(currentQuestion.question)}
-          ></div>
-          <ul style={{ listStyleType: 'none', padding: 0 }}>
+          ></Box>
+          <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
             {currentQuestion.options.map((option, index) => (
               <li
                 key={index}
@@ -232,20 +274,27 @@ const Game: React.FC = () => {
                   color: quizAnswers[currentQuestion.id] === option ? 'white' : 'black',
                   marginBottom: '10px',
                   borderRadius: '8px',
-                  padding: '10px',
+                  padding: isMobile ? '10px 8px' : '10px 16px',
                   cursor: 'pointer',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  fontWeight: 500,
+                  fontSize: isMobile ? '0.98rem' : '1.05rem',
+                  border: showAnswers && option === currentQuestion.correctAnswer ? '2px solid #28a745' : 'none',
+                  boxShadow: quizAnswers[currentQuestion.id] === option ? '0px 4px 10px rgba(0,0,0,0.2)' : 'none',
+                  transition: 'all 0.2s',
                 }}
-                onMouseOver={(e) => (e.currentTarget.style.boxShadow = '0px 4px 10px rgba(0, 0, 0, 0.3)')}
-                onMouseOut={(e) => (e.currentTarget.style.boxShadow = 'none')}
+                onMouseOver={e => (e.currentTarget.style.boxShadow = '0px 4px 10px rgba(0, 0, 0, 0.3)')}
+                onMouseOut={e => (e.currentTarget.style.boxShadow = quizAnswers[currentQuestion.id] === option ? '0px 4px 10px rgba(0,0,0,0.2)' : 'none')}
                 onClick={() => handleAnswerSelect(option)}
               >
                 {option}
+                {showAnswers && option === currentQuestion.correctAnswer && (
+                  <span style={{ marginLeft: 8, color: '#28a745', fontWeight: 'bold' }}>✓</span>
+                )}
               </li>
             ))}
           </ul>
-        </div>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 3 }}>
+        </Paper>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
           <Button
             variant="contained"
             disabled={currentQuestionIndex === 0}
@@ -253,6 +302,8 @@ const Game: React.FC = () => {
             sx={{
               backgroundColor: '#007bff',
               '&:hover': { backgroundColor: '#0056b3' },
+              fontSize: { xs: '0.95rem', sm: '1rem' },
+              minWidth: { xs: 80, sm: 100 },
               transition: 'background-color 0.3s',
             }}
           >
@@ -264,14 +315,16 @@ const Game: React.FC = () => {
             sx={{
               backgroundColor: '#007bff',
               '&:hover': { backgroundColor: '#0056b3' },
+              fontSize: { xs: '0.95rem', sm: '1rem' },
+              minWidth: { xs: 80, sm: 100 },
               transition: 'background-color 0.3s',
             }}
           >
             {currentQuestionIndex === mockQuizData.length - 1 ? 'Submit' : 'Next'}
           </Button>
         </Box>
-        <Box sx={{ marginTop: 3 }}>
-          <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#00e6e6' }}>
+        <Box sx={{ marginTop: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#00e6e6', fontSize: { xs: '0.95rem', sm: '1rem' } }}>
             Progress:
           </Typography>
           <CircularProgress
@@ -279,7 +332,7 @@ const Game: React.FC = () => {
             value={progress}
             sx={{
               color: '#00e6e6',
-              marginTop: 2,
+              marginTop: 1,
               '& .MuiCircularProgress-circle': { strokeWidth: 5 },
             }}
           />
@@ -290,19 +343,21 @@ const Game: React.FC = () => {
       <Modal open={showModal} onClose={() => setShowModal(false)}>
         <Box
           sx={{
-            width: '50%',
+            width: { xs: '90vw', sm: '60vw', md: '50%' },
             margin: 'auto',
-            marginTop: '10%',
-            padding: 4,
+            marginTop: { xs: '20%', sm: '10%' },
+            padding: { xs: 2, sm: 4 },
             backgroundColor: 'white',
             borderRadius: 2,
             boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.5)',
+            color: '#222',
+            textAlign: 'center',
           }}
         >
-          <Typography variant="h5" sx={{ marginBottom: 2, fontWeight: 'bold', color: '#007bff' }}>
+          <Typography variant="h5" sx={{ marginBottom: 2, fontWeight: 'bold', color: '#007bff', fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
             Quiz Results
           </Typography>
-          <Typography variant="body1" sx={{ fontSize: '1.2rem', marginBottom: 2 }}>
+          <Typography variant="body1" sx={{ fontSize: { xs: '1rem', sm: '1.2rem' }, marginBottom: 2 }}>
             Score: {Object.values(quizResults).filter((result) => result).length} / {mockQuizData.length}
           </Typography>
           <Button
@@ -312,10 +367,13 @@ const Game: React.FC = () => {
               setQuizAnswers({});
               setQuizResults({});
               setCurrentQuestionIndex(0);
+              setTimer(300);
             }}
             sx={{
               backgroundColor: '#007bff',
               '&:hover': { backgroundColor: '#0056b3' },
+              fontSize: { xs: '0.95rem', sm: '1rem' },
+              minWidth: { xs: 80, sm: 100 },
               transition: 'background-color 0.3s',
             }}
           >

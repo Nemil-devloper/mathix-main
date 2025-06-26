@@ -111,14 +111,15 @@ const Home: React.FC = () => {
       <Navbar username={username} navigate={navigate} onLogout={() => navigate('/login')} onProfileClick={function (): void {
         throw new Error('Function not implemented.');
       } } />
-      <Box sx={{ marginTop: '80px', padding: 3 }}>
+      <Box sx={{ marginTop: { xs: '80px', md: '80px' }, padding: { xs: 1, md: 3 } }}>
         {/* Greeting */}
-        <Box sx={{ textAlign: 'center', margin: 4 }}>
+        <Box sx={{ textAlign: 'center', margin: { xs: 2, md: 4 } }}>
           <Typography
             variant="h4"
             sx={{
               fontWeight: 'bold',
               color: '#ffffff',
+              fontSize: { xs: '1.5rem', md: '2.25rem' },
             }}
           >
             Hello, {username}
@@ -127,6 +128,7 @@ const Home: React.FC = () => {
             variant="h6"
             sx={{
               color: '#ffffff',
+              fontSize: { xs: '1rem', md: '1.25rem' },
             }}
           >
             {greeting}
@@ -137,9 +139,9 @@ const Home: React.FC = () => {
         <Box
           sx={{
             display: 'flex',
-            flexDirection: 'column',
+            flexDirection: { xs: 'column', md: 'column' },
             gap: 3,
-            padding: 2,
+            padding: { xs: 0, md: 2 },
             flex: '1 1 auto',
           }}
         >
@@ -148,23 +150,24 @@ const Home: React.FC = () => {
             elevation={3}
             sx={{
               display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
               justifyContent: 'space-between',
               alignItems: 'center',
               padding: 0,
-              height: '250px',
+              height: { xs: 'auto', md: '250px' },
               cursor: 'pointer',
               background: 'rgba(255, 255, 255, 0.8)',
               borderRadius: '10px',
               '&:hover': { boxShadow: '0 8px 16px rgba(0,0,0,0.2)' },
             }}
-            onClick={() => navigate('/online')} // Navigate to the Online page
+            onClick={() => navigate('/online')}
           >
             <Box sx={{ flex: 1, padding: 2 }}>
               <Typography
                 variant="h5"
                 sx={{
                   fontWeight: 'bold',
-                  fontSize: '24px',
+                  fontSize: { xs: '20px', md: '24px' },
                   fontFamily: 'Roboto, sans-serif',
                 }}
               >
@@ -174,7 +177,7 @@ const Home: React.FC = () => {
                 variant="body1"
                 sx={{
                   color: '#757575',
-                  fontSize: '18px',
+                  fontSize: { xs: '16px', md: '18px' },
                   fontFamily: 'Roboto, sans-serif',
                 }}
               >
@@ -186,10 +189,10 @@ const Home: React.FC = () => {
               src={OnlineImage}
               alt="Online Sessions"
               sx={{
-                width: '35%',
-                height: '100%',
+                width: { xs: '100%', sm: '35%' },
+                height: { xs: 140, sm: '100%' },
                 objectFit: 'cover',
-                borderRadius: '0 10px 10px 0',
+                borderRadius: { xs: '0 0 10px 10px', sm: '0 10px 10px 0' },
               }}
             />
           </Paper>
@@ -199,34 +202,35 @@ const Home: React.FC = () => {
             elevation={3}
             sx={{
               display: 'flex',
+              flexDirection: { xs: 'column-reverse', sm: 'row' },
               justifyContent: 'space-between',
               alignItems: 'center',
               padding: 0,
-              height: '250px',
+              height: { xs: 'auto', md: '250px' },
               cursor: 'pointer',
               background: 'rgba(255, 255, 255, 0.8)',
               borderRadius: '10px',
               '&:hover': { boxShadow: '0 8px 16px rgba(0,0,0,0.2)' },
             }}
-            onClick={() => navigate('/offline')} // Navigate to the Offline page
+            onClick={() => navigate('/offline')}
           >
             <Box
               component="img"
               src={OfflineImage}
               alt="Offline Sessions"
               sx={{
-                width: '35%',
-                height: '100%',
+                width: { xs: '100%', sm: '35%' },
+                height: { xs: 140, sm: '100%' },
                 objectFit: 'cover',
-                borderRadius: '10px 0 0 10px',
+                borderRadius: { xs: '10px 10px 0 0', sm: '10px 0 0 10px' },
               }}
             />
-            <Box sx={{ flex: 1, textAlign: 'right', padding: 2 }}>
+            <Box sx={{ flex: 1, textAlign: { xs: 'left', sm: 'right' }, padding: 2 }}>
               <Typography
                 variant="h5"
                 sx={{
                   fontWeight: 'bold',
-                  fontSize: '24px',
+                  fontSize: { xs: '20px', md: '24px' },
                   fontFamily: 'Roboto, sans-serif',
                 }}
               >
@@ -236,7 +240,7 @@ const Home: React.FC = () => {
                 variant="body1"
                 sx={{
                   color: '#757575',
-                  fontSize: '18px',
+                  fontSize: { xs: '16px', md: '18px' },
                   fontFamily: 'Roboto, sans-serif',
                 }}
               >
@@ -250,23 +254,24 @@ const Home: React.FC = () => {
             elevation={3}
             sx={{
               display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
               justifyContent: 'space-between',
               alignItems: 'center',
               padding: 0,
-              height: '250px',
+              height: { xs: 'auto', md: '250px' },
               cursor: 'pointer',
               background: 'rgba(255, 255, 255, 0.8)',
               borderRadius: '10px',
               '&:hover': { boxShadow: '0 8px 16px rgba(0,0,0,0.2)' },
             }}
-            onClick={() => navigate('/AIPage')} // Navigate to AIPage
+            onClick={() => navigate('/AIPage')}
           >
             <Box sx={{ flex: 1, padding: 2 }}>
               <Typography
                 variant="h5"
                 sx={{
                   fontWeight: 'bold',
-                  fontSize: '24px',
+                  fontSize: { xs: '20px', md: '24px' },
                   fontFamily: 'Roboto, sans-serif',
                 }}
               >
@@ -276,7 +281,7 @@ const Home: React.FC = () => {
                 variant="body1"
                 sx={{
                   color: '#757575',
-                  fontSize: '18px',
+                  fontSize: { xs: '16px', md: '18px' },
                   fontFamily: 'Roboto, sans-serif',
                 }}
               >
@@ -288,10 +293,10 @@ const Home: React.FC = () => {
               src={AiImage}
               alt="Learn with AI"
               sx={{
-                width: '35%',
-                height: '100%',
+                width: { xs: '100%', sm: '35%' },
+                height: { xs: 140, sm: '100%' },
                 objectFit: 'cover',
-                borderRadius: '0 10px 10px 0',
+                borderRadius: { xs: '0 0 10px 10px', sm: '0 10px 10px 0' },
               }}
             />
           </Paper>
@@ -301,34 +306,35 @@ const Home: React.FC = () => {
             elevation={3}
             sx={{
               display: 'flex',
+              flexDirection: { xs: 'column-reverse', sm: 'row' },
               justifyContent: 'space-between',
               alignItems: 'center',
               padding: 0,
-              height: '250px',
+              height: { xs: 'auto', md: '250px' },
               cursor: 'pointer',
               background: 'rgba(255, 255, 255, 0.8)',
               borderRadius: '10px',
               '&:hover': { boxShadow: '0 8px 16px rgba(0,0,0,0.2)' },
             }}
-            onClick={() => navigate('/notes')} // Navigate to the Notes page
+            onClick={() => navigate('/notes')}
           >
             <Box
               component="img"
               src={NotesImage}
               alt="Notes and PYQ"
               sx={{
-                width: '35%',
-                height: '100%',
+                width: { xs: '100%', sm: '35%' },
+                height: { xs: 140, sm: '100%' },
                 objectFit: 'cover',
-                borderRadius: '10px 0 0 10px',
+                borderRadius: { xs: '10px 10px 0 0', sm: '10px 0 0 10px' },
               }}
             />
-            <Box sx={{ flex: 1, textAlign: 'right', padding: 2 }}>
+            <Box sx={{ flex: 1, textAlign: { xs: 'left', sm: 'right' }, padding: 2 }}>
               <Typography
                 variant="h5"
                 sx={{
                   fontWeight: 'bold',
-                  fontSize: '24px',
+                  fontSize: { xs: '20px', md: '24px' },
                   fontFamily: 'Roboto, sans-serif',
                 }}
               >
@@ -338,7 +344,7 @@ const Home: React.FC = () => {
                 variant="body1"
                 sx={{
                   color: '#757575',
-                  fontSize: '18px',
+                  fontSize: { xs: '16px', md: '18px' },
                   fontFamily: 'Roboto, sans-serif',
                 }}
               >

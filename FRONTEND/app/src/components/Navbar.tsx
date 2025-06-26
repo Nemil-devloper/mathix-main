@@ -62,16 +62,22 @@ const Navbar: React.FC<NavbarProps> = ({ username, onLogout, navigate, onProfile
         position="fixed"
         sx={{
           background: 'linear-gradient(45deg,rgb(149, 100, 218), #6200EA)',
-          height: '80px',
+          height: { xs: '56px', sm: '64px', md: '80px' },
           zIndex: 1300,
-          overflow: 'hidden', // Prevent scrollbars
+          overflow: 'hidden',
         }}
       >
         <Toolbar
           sx={{
             justifyContent: 'space-between',
             height: '100%',
-            overflow: 'hidden', // Prevent scrollbars in the toolbar
+            minHeight: { xs: '56px', sm: '64px', md: '80px' },
+            overflow: 'hidden',
+            paddingLeft: { xs: 1, sm: 2 },
+            paddingRight: { xs: 1, sm: 2 },
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
           }}
         >
           <IconButton
@@ -79,29 +85,78 @@ const Navbar: React.FC<NavbarProps> = ({ username, onLogout, navigate, onProfile
             color="inherit"
             onClick={() => setDrawerOpen(true)}
             sx={{
-              position: 'absolute',
-              left: '10px',
-              top: '50%',
-              transform: 'translateY(-50%)',
+              mr: 1,
               zIndex: 1301,
             }}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h5" sx={{ fontWeight: 'bold', fontSize: '28px', color: 'white', margin: '0 auto' }}>
-            MATHIX AI LEARNING HUB
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)' }}>
-            <IconButton color="inherit" onClick={(e) => setMailAnchorEl(e.currentTarget)}>
-              <MailIcon />
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              justifyContent: { xs: 'center', sm: 'center', md: 'center' },
+              alignItems: 'center',
+              minWidth: 0,
+              overflow: 'hidden',
+            }}
+          >
+            <Typography
+              variant="h5"
+              noWrap
+              sx={{
+                fontWeight: 'bold',
+                fontSize: { xs: '1rem', sm: '1.3rem', md: '1.75rem' },
+                color: 'white',
+                textAlign: 'center',
+                width: { xs: '100%', sm: 'auto' },
+                minWidth: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: { xs: 'none', sm: 'block' },
+              }}
+            >
+              MATHIX AI LEARNING HUB
+            </Typography>
+            <Typography
+              variant="h6"
+              noWrap
+              sx={{
+                fontWeight: 'bold',
+                fontSize: '1rem',
+                color: 'white',
+                textAlign: 'center',
+                width: '100%',
+                minWidth: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: { xs: 'block', sm: 'none' },
+                letterSpacing: 1,
+              }}
+            >
+              MATHIX
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: { xs: 0.5, sm: 2 },
+              ml: { xs: 0, sm: 2 },
+              minWidth: { xs: 70, sm: 120 },
+              flexShrink: 0,
+            }}
+          >
+            <IconButton color="inherit" onClick={(e) => setMailAnchorEl(e.currentTarget)} sx={{ p: { xs: 0.5, sm: 1 } }}>
+              <MailIcon fontSize="small" />
             </IconButton>
             <IconButton
               color="inherit"
               onClick={(e) => setAnchorEl(e.currentTarget)}
-              sx={{ ml: 1 }}
+              sx={{ ml: 0.5, p: { xs: 0.5, sm: 1 } }}
             >
               <Badge badgeContent={notifications.filter(n => !n.read).length} color="error">
-                <NotificationsIcon />
+                <NotificationsIcon fontSize="small" />
               </Badge>
             </IconButton>
           </Box>
@@ -114,19 +169,19 @@ const Navbar: React.FC<NavbarProps> = ({ username, onLogout, navigate, onProfile
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         sx={{
-          zIndex: 1302, // Ensure the sidebar appears above the Navbar
+          zIndex: 1302,
           '& .MuiDrawer-paper': {
-            width: 300,
+            width: { xs: 220, sm: 260, md: 300 }, // Responsive drawer width
             backgroundColor: '#3f51b5',
             color: 'white',
           },
         }}
       >
         <Box sx={{ textAlign: 'center', padding: 2 }}>
-          <Avatar sx={{ width: 100, height: 100, margin: '0 auto', backgroundColor: '#fff', color: '#3f51b5' }}>
+          <Avatar sx={{ width: 80, height: 80, margin: '0 auto', backgroundColor: '#fff', color: '#3f51b5' }}>
             {username && username.length > 0 ? username.charAt(0).toUpperCase() : 'U'}
           </Avatar>
-          <Typography variant="h6" sx={{ marginTop: 1 }}>
+          <Typography variant="h6" sx={{ marginTop: 1, fontSize: { xs: '1rem', sm: '1.2rem' } }}>
             {username && username.length > 0 ? username : 'User'}
           </Typography>
         </Box>

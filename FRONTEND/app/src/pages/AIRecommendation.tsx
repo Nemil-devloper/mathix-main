@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Paper, CircularProgress } from '@mui/material';
+import { Box, Typography, Paper, CircularProgress, useMediaQuery } from '@mui/material';
 import Navbar from '../components/Navbar';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
+import 'katex/dist/katex.min.css';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
 
 const AIRecommendation: React.FC = () => {
   const navigate = useNavigate();
@@ -10,6 +14,7 @@ const AIRecommendation: React.FC = () => {
   const [suggestion, setSuggestion] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [pageCount, setPageCount] = useState<number>(0);
+  const isMobile = useMediaQuery('(max-width:600px)');
 
   const GROQ_API_URL = import.meta.env.VITE_GROQ_API_URL;
   const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
@@ -75,7 +80,7 @@ const AIRecommendation: React.FC = () => {
         background: 'linear-gradient(to bottom, #1e3c72, #2a5298)',
         overflowX: 'hidden',
         overflowY: 'auto',
-        padding: 3,
+        padding: { xs: 1, sm: 2, md: 3 },
       }}
     >
       <Navbar
@@ -84,14 +89,21 @@ const AIRecommendation: React.FC = () => {
         onLogout={() => navigate('/login')}
         onProfileClick={() => {}}
       />
-      <Box sx={{ marginTop: '100px', padding: 3, display: 'flex', justifyContent: 'center' }}>
+      <Box
+        sx={{
+          marginTop: { xs: '70px', sm: '100px' },
+          padding: { xs: 1, sm: 3 },
+          display: 'flex',
+          justifyContent: 'center',
+        }}
+      >
         <Paper
           elevation={3}
           sx={{
-            padding: 4,
+            padding: { xs: 2, sm: 4 },
             borderRadius: 3,
-            minWidth: 350,
-            maxWidth: 600,
+            minWidth: { xs: '90vw', sm: 350 },
+            maxWidth: { xs: '95vw', sm: 600 },
             margin: '0 auto',
             background: '#fff',
             color: '#222',
@@ -99,17 +111,40 @@ const AIRecommendation: React.FC = () => {
             alignItems: 'center',
             justifyContent: 'center',
             minHeight: 120,
+            boxSizing: 'border-box',
+            width: { xs: '100%', sm: 'auto' },
           }}
         >
           {loading ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <CircularProgress color="inherit" size={28} />
-              <Typography sx={{ color: '#222' }}>Fetching your personalized suggestion...</Typography>
+              <Typography sx={{ color: '#222', fontSize: { xs: '1rem', sm: '1.1rem' } }}>
+                Fetching your personalized suggestion...
+              </Typography>
             </Box>
           ) : (
-            <Typography sx={{ color: suggestion === 'Could not fetch recommendation.' ? 'red' : '#222', fontSize: '18px', fontFamily: 'Roboto, sans-serif', textAlign: 'center' }}>
-              {suggestion}
-            </Typography>
+            <Box sx={{ width: '100%' }}>
+              <ReactMarkdown
+                remarkPlugins={[remarkMath]}
+                rehypePlugins={[rehypeKatex]}
+                components={{
+                  p: ({ node, ...props }) => (
+                    <Typography
+                      sx={{
+                        color: suggestion === 'Could not fetch recommendation.' ? 'red' : '#222',
+                        fontSize: { xs: '1rem', sm: '1.15rem' },
+                        fontFamily: 'Roboto, sans-serif',
+                        textAlign: 'center',
+                        wordBreak: 'break-word',
+                      }}
+                      {...props}
+                    />
+                  ),
+                }}
+              >
+                {suggestion}
+              </ReactMarkdown>
+            </Box>
           )}
         </Paper>
       </Box>

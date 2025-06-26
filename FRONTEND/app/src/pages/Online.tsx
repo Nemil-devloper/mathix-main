@@ -7,8 +7,9 @@ import {
   Grid,
   Avatar,
   CircularProgress,
+  useMediaQuery,
 } from '@mui/material';
-import Navbar from '../components/Navbar'; // Import Navbar component
+import Navbar from '../components/Navbar';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -16,6 +17,7 @@ const Online: React.FC = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+  const isMobile = useMediaQuery('(max-width:600px)');
 
   useEffect(() => {
     setUsername(localStorage.getItem('username') || '');
@@ -56,7 +58,6 @@ const Online: React.FC = () => {
   };
 
   useEffect(() => {
-    // Update the current class status dynamically
     const interval = setInterval(() => {
       const currentClassElement = document.getElementById('current-class');
       if (currentClassElement) {
@@ -64,7 +65,7 @@ const Online: React.FC = () => {
       }
     }, 60000);
 
-    return () => clearInterval(interval); // Cleanup interval on component unmount
+    return () => clearInterval(interval);
   }, []);
 
   const handleNotifyMe = async (classItem: { subject: string; time: string }) => {
@@ -86,20 +87,26 @@ const Online: React.FC = () => {
     <Box
       sx={{
         display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
         width: '100vw',
         height: '100vh',
-        marginTop: '80px', // Increased top margin to avoid content being hidden by the Navbar
+        marginTop: { xs: '56px', sm: '64px', md: '80px' },
         background: 'linear-gradient(to bottom, #1e3c72, #2a5298)',
         color: '#f0f0f0',
+        overflow: 'hidden',
       }}
     >
-      {/* Left Frame (30%) */}
+      {/* Left Frame */}
       <Box
         sx={{
-          width: '30%',
-          padding: 3,
+          width: { xs: '100%', md: '30%' },
+          minWidth: 0,
+          padding: { xs: 1, sm: 2, md: 3 },
           backgroundColor: 'rgba(255, 255, 255, 0.1)',
           overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'stretch',
         }}
       >
         <Navbar username={username} navigate={navigate} onLogout={handleLogout} onProfileClick={function (): void {
@@ -108,65 +115,74 @@ const Online: React.FC = () => {
         <Paper
           elevation={3}
           sx={{
-            padding: 3,
-            marginTop: 3,
+            padding: { xs: 2, sm: 3 },
+            marginTop: { xs: 2, sm: 3 },
             borderRadius: 3,
             backgroundColor: 'rgba(255, 255, 255, 0.2)',
             color: '#ffffff',
           }}
         >
-          <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: 2, fontSize: { xs: '1rem', sm: '1.1rem' } }}>
             Daily Quiz
           </Typography>
-          <Typography variant="body2" sx={{ marginBottom: 2 }}>
+          <Typography variant="body2" sx={{ marginBottom: 2, fontSize: { xs: '0.95rem', sm: '1rem' } }}>
             Solve this: What is the square root of 144?
           </Typography>
-          <Button variant="contained" color="secondary">
+          <Button variant="contained" color="secondary" sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }}>
             Submit Answer
           </Button>
         </Paper>
         <Paper
           elevation={3}
           sx={{
-            padding: 3,
-            marginTop: 3,
+            padding: { xs: 2, sm: 3 },
+            marginTop: { xs: 2, sm: 3 },
             borderRadius: 3,
             backgroundColor: 'rgba(255, 255, 255, 0.2)',
             color: '#ffffff',
           }}
         >
-          <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: 2, fontSize: { xs: '1rem', sm: '1.1rem' } }}>
             Progress Tracker
           </Typography>
-          <CircularProgress
-            variant="determinate"
-            value={75}
-            size={80}
-            sx={{ color: '#90caf9', marginBottom: 2 }}
-          />
-          <Typography variant="body2">75% Completed</Typography>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'row', sm: 'column' }, alignItems: 'center', gap: 2 }}>
+            <CircularProgress
+              variant="determinate"
+              value={75}
+              size={isMobile ? 50 : 80}
+              sx={{ color: '#90caf9', marginBottom: { xs: 0, sm: 2 } }}
+            />
+            <Typography variant="body2" sx={{ fontSize: { xs: '0.95rem', sm: '1rem' } }}>75% Completed</Typography>
+          </Box>
         </Paper>
       </Box>
 
-      {/* Right Frame (70%) */}
+      {/* Right Frame */}
       <Box
         sx={{
-          width: '70%',
-          padding: 3,
+          width: { xs: '100%', md: '70%' },
+          padding: { xs: 1, sm: 2, md: 3 },
           overflowY: 'auto',
         }}
       >
-        {/* Upcoming & Live Classes Panel */}
-        <Typography variant="h4" sx={{ fontWeight: 'bold', marginBottom: 3 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 'bold',
+            marginBottom: 3,
+            fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' },
+            textAlign: { xs: 'center', md: 'left' },
+          }}
+        >
           Upcoming & Live Classes
         </Typography>
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           {schedule.map((classItem, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
               <Paper
                 elevation={3}
                 sx={{
-                  padding: 3,
+                  padding: { xs: 2, sm: 3 },
                   borderRadius: 3,
                   backgroundColor: 'rgba(255, 255, 255, 0.1)',
                   color: '#ffffff',
@@ -175,32 +191,44 @@ const Online: React.FC = () => {
                     transform: 'scale(1.02)',
                     transition: '0.3s',
                   },
+                  minHeight: { xs: 160, sm: 180 },
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
                 }}
               >
-                <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: 1 }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: 1, fontSize: { xs: '1rem', sm: '1.1rem' } }}>
                   {classItem.subject}
                 </Typography>
-                <Typography variant="body2" sx={{ marginBottom: 1 }}>
+                <Typography variant="body2" sx={{ marginBottom: 1, fontSize: { xs: '0.95rem', sm: '1rem' } }}>
                   {classItem.time}
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
-                  <Avatar sx={{ marginRight: 1, backgroundColor: '#90caf9' }}>
+                  <Avatar sx={{ marginRight: 1, backgroundColor: '#90caf9', width: 32, height: 32, fontSize: 18 }}>
                     {classItem.teacher[0]}
                   </Avatar>
-                  <Typography variant="body2">{classItem.teacher}</Typography>
+                  <Typography variant="body2" sx={{ fontSize: { xs: '0.95rem', sm: '1rem' } }}>{classItem.teacher}</Typography>
                 </Box>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  sx={{ marginRight: 1 }}
-                  onClick={() => alert(`Joining ${classItem.subject} class...`)}
-                >
-                  Join Now
-                </Button>
-                <Button variant="outlined" color="secondary"
-                  onClick={() => handleNotifyMe(classItem)}>
-                  Notify Me
-                </Button>
+                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    sx={{ marginRight: { xs: 0, sm: 1 }, fontSize: { xs: '0.9rem', sm: '1rem' } }}
+                    onClick={() => alert(`Joining ${classItem.subject} class...`)}
+                    fullWidth={isMobile}
+                  >
+                    Join Now
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }}
+                    onClick={() => handleNotifyMe(classItem)}
+                    fullWidth={isMobile}
+                  >
+                    Notify Me
+                  </Button>
+                </Box>
               </Paper>
             </Grid>
           ))}
