@@ -34,7 +34,7 @@ const Chatbot: React.FC = () => {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognition = SpeechRecognition ? new SpeechRecognition() : null;
 
-  const GROQ_API_URL = import.meta.env.VITE_GROQ_API_URL || 'https://api.groq.com/openai/v1/chat/completions';
+  const GROQ_API_URL = import.meta.env.VITE_GROQ_API_URL;
   const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
   if (recognition) {

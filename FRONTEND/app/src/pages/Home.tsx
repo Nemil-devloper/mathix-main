@@ -4,13 +4,20 @@ import { Box, Paper, Typography } from '@mui/material';
 import Navbar from '../components/Navbar'; // Use the existing Navbar component
 import OnlineImage from '../assets/online.png';
 import OfflineImage from '../assets/offline.jpg';
-import AiImage from '../assets/ai.jpg';
+import AiImage from '../assets/ai.png';
 import NotesImage from '../assets/notes.jpg';
 import BackgroundImage from '../assets/bg.jpg';
+import axios from 'axios';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import Badge from '@mui/material/Badge';
+import IconButton from '@mui/material/IconButton';
+import Popover from '@mui/material/Popover';
 
 const Home: React.FC = () => {
   const [greeting, setGreeting] = useState<string>('');
   const [username, setUsername] = useState<string>('');
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,6 +27,40 @@ const Home: React.FC = () => {
     }
     updateTimeAndGreeting();
     const interval = setInterval(updateTimeAndGreeting, 60000);
+
+    // Increment page count on mount
+    const incrementPageCount = async () => {
+      const token = localStorage.getItem('token');
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+      if (token) {
+        try {
+          await axios.post(`${API_BASE_URL}/api/user/increment-page`, {}, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        } catch (e) {
+          // Ignore error
+        }
+      }
+    };
+    incrementPageCount();
+
+    // Fetch notifications
+    const fetchNotifications = async () => {
+      const token = localStorage.getItem('token');
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+      if (token) {
+        try {
+          const res = await axios.get(`${API_BASE_URL}/api/notifications`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setNotifications(res.data || []);
+        } catch (e) {
+          setNotifications([]);
+        }
+      }
+    };
+    fetchNotifications();
+
     return () => clearInterval(interval);
   }, []);
 
@@ -307,6 +348,39 @@ const Home: React.FC = () => {
           </Paper>
         </Box>
       </Box>
+
+      {/* Notification Bell */}
+      <Box sx={{ position: 'absolute', top: 24, right: 36, zIndex: 10 }}>
+        <IconButton
+          color="inherit"
+          onClick={(e) => setAnchorEl(e.currentTarget)}
+        >
+          <Badge badgeContent={notifications.filter(n => !n.read).length} color="error">
+            <NotificationsIcon />
+          </Badge>
+        </IconButton>
+        <Popover
+          open={Boolean(anchorEl)}
+          anchorEl={anchorEl}
+          onClose={() => setAnchorEl(null)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <Box sx={{ p: 2, minWidth: 250 }}>
+            <Typography variant="h6" sx={{ mb: 1 }}>Notifications</Typography>
+            {notifications.length === 0 && (
+              <Typography variant="body2" color="text.secondary">No notifications</Typography>
+            )}
+            {notifications.map((n, idx) => (
+              <Box key={n._id || idx} sx={{ mb: 1, bgcolor: n.read ? 'grey.100' : 'primary.light', p: 1, borderRadius: 1 }}>
+                <Typography variant="body2">{n.message}</Typography>
+                <Typography variant="caption" color="text.secondary">{new Date(n.createdAt).toLocaleString()}</Typography>
+              </Box>
+            ))}
+          </Box>
+        </Popover>
+      </Box>
+
       <Box
         component="footer"
         sx={{

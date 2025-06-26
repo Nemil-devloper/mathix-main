@@ -64,9 +64,19 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   institution: { type: String, required: false },
   class: { type: String, required: false },
+  pageCount: { type: Number, default: 0 }, // <-- Add this line
 });
 
 const User = mongoose.model('User', userSchema); // Ensure collection is named 'users'
+
+// Notification Schema & Model
+const notificationSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  message: { type: String, required: true },
+  read: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now }
+});
+const Notification = mongoose.model('Notification', notificationSchema);
 
 // ✅ Signup Route
 app.post('/api/auth/signup', async (req, res) => {
@@ -137,6 +147,80 @@ app.get('/api/auth/profile', async (req, res) => {
   } catch (err) {
     console.error('Profile fetch error:', err);
     res.status(500).send({ message: 'Error fetching profile' });
+  }
+});
+
+// ✅ Increment Page Count Route
+app.post('/api/user/increment-page', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).send({ message: 'Unauthorized' });
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const user = await User.findById(decoded.id);
+    if (!user) return res.status(404).send({ message: 'User not found' });
+
+    user.pageCount = (user.pageCount || 0) + 1;
+    await user.save();
+
+    res.json({ pageCount: user.pageCount });
+  } catch (err) {
+    console.error('Increment page error:', err);
+    res.status(500).send({ message: 'Error incrementing page count' });
+  }
+});
+
+// ✅ Add Notification (Notify Me)
+app.post('/api/notifications', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).send({ message: 'Unauthorized' });
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const { message } = req.body;
+    if (!message) return res.status(400).json({ message: 'Message required' });
+
+    const notification = new Notification({
+      userId: decoded.id,
+      message
+    });
+    await notification.save();
+    res.status(201).json(notification);
+  } catch (err) {
+    res.status(500).json({ message: 'Error saving notification' });
+  }
+});
+
+// ✅ Get Notifications for User
+app.get('/api/notifications', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).send({ message: 'Unauthorized' });
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const notifications = await Notification.find({ userId: decoded.id }).sort({ createdAt: -1 });
+    res.json(notifications);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching notifications' });
+  }
+});
+
+// ✅ Mark notification as read
+app.post('/api/notifications/:id/read', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).send({ message: 'Unauthorized' });
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const notification = await Notification.findOneAndUpdate(
+      { _id: req.params.id, userId: decoded.id },
+      { read: true },
+      { new: true }
+    );
+    if (!notification) return res.status(404).json({ message: 'Notification not found' });
+    res.json(notification);
+  } catch (err) {
+    res.status(500).json({ message: 'Error updating notification' });
   }
 });
 

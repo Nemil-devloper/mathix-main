@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -12,11 +12,15 @@ import {
   Box,
   Avatar,
   Divider,
+  Badge,
+  Popover,
+  CircularProgress,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MailIcon from '@mui/icons-material/Mail';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import axios from 'axios';
 import { useLocation } from 'react-router-dom'; // Import useLocation hook
 
 interface NavbarProps {
@@ -28,7 +32,28 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ username, onLogout, navigate, onProfileClick }) => {
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [mailAnchorEl, setMailAnchorEl] = useState<null | HTMLElement>(null);
   const location = useLocation(); // Get current location
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      const token = localStorage.getItem('token');
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+      if (token) {
+        try {
+          const res = await axios.get(`${API_BASE_URL}/api/notifications`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setNotifications(res.data || []);
+        } catch (e) {
+          setNotifications([]);
+        }
+      }
+    };
+    fetchNotifications();
+  }, []);
 
   return (
     <>
@@ -67,11 +92,17 @@ const Navbar: React.FC<NavbarProps> = ({ username, onLogout, navigate, onProfile
             MATHIX AI LEARNING HUB
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)' }}>
-            <IconButton color="inherit">
+            <IconButton color="inherit" onClick={(e) => setMailAnchorEl(e.currentTarget)}>
               <MailIcon />
             </IconButton>
-            <IconButton color="inherit">
-              <NotificationsIcon />
+            <IconButton
+              color="inherit"
+              onClick={(e) => setAnchorEl(e.currentTarget)}
+              sx={{ ml: 1 }}
+            >
+              <Badge badgeContent={notifications.filter(n => !n.read).length} color="error">
+                <NotificationsIcon />
+              </Badge>
             </IconButton>
           </Box>
         </Toolbar>
@@ -172,8 +203,61 @@ const Navbar: React.FC<NavbarProps> = ({ username, onLogout, navigate, onProfile
           </ListItem>
         </List>
       </Drawer>
+
+      {/* Mail (Post Message) Popover */}
+      <Popover
+        open={Boolean(mailAnchorEl)}
+        anchorEl={mailAnchorEl}
+        onClose={() => setMailAnchorEl(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Box sx={{ p: 2, minWidth: 250 }}>
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            Message from Admin
+          </Typography>
+          <Box sx={{ mb: 1, bgcolor: 'info.light', p: 1, borderRadius: 1 }}>
+            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+              Welcome to Mathix AI Learning Hub!
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              — mathix Team
+            </Typography>
+          </Box>
+        </Box>
+      </Popover>
+
+      {/* Notifications Popover */}
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={() => setAnchorEl(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Box sx={{ p: 2, minWidth: 250 }}>
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            Class Notifications
+          </Typography>
+          {/* User notifications */}
+          {notifications.length === 0 && (
+            <Typography variant="body2" color="text.secondary">
+              No notifications
+            </Typography>
+          )}
+          {notifications.map((n, idx) => (
+            <Box key={n._id || idx} sx={{ mb: 1, bgcolor: n.read ? 'grey.100' : 'primary.light', p: 1, borderRadius: 1 }}>
+              <Typography variant="body2">{n.message}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {new Date(n.createdAt).toLocaleString()}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </Popover>
     </>
   );
 };
 
 export default Navbar;
+

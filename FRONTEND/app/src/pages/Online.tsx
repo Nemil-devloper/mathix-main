@@ -10,10 +10,12 @@ import {
 } from '@mui/material';
 import Navbar from '../components/Navbar'; // Import Navbar component
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Online: React.FC = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
   useEffect(() => {
     setUsername(localStorage.getItem('username') || '');
@@ -64,6 +66,21 @@ const Online: React.FC = () => {
 
     return () => clearInterval(interval); // Cleanup interval on component unmount
   }, []);
+
+  const handleNotifyMe = async (classItem: { subject: string; time: string }) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+      await axios.post(
+        `${API_BASE_URL}/api/notifications`,
+        { message: `Class Reminder: ${classItem.subject} at ${classItem.time}` },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert('You will be notified for this class!');
+    } catch (err) {
+      alert('Could not set notification.');
+    }
+  };
 
   return (
     <Box
@@ -180,7 +197,8 @@ const Online: React.FC = () => {
                 >
                   Join Now
                 </Button>
-                <Button variant="outlined" color="secondary">
+                <Button variant="outlined" color="secondary"
+                  onClick={() => handleNotifyMe(classItem)}>
                   Notify Me
                 </Button>
               </Paper>

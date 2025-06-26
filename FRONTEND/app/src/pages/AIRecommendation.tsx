@@ -2,34 +2,59 @@ import React, { useEffect, useState } from 'react';
 import { Box, Typography, Paper, CircularProgress } from '@mui/material';
 import Navbar from '../components/Navbar';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const AIRecommendation: React.FC = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [suggestion, setSuggestion] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
-  const FASTAPI_URL = import.meta.env.VITE_FASTAPI_URL || 'http://localhost:8000';
+  const [pageCount, setPageCount] = useState<number>(0);
+
+  const GROQ_API_URL = import.meta.env.VITE_GROQ_API_URL;
+  const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
   useEffect(() => {
     const storedUsername = localStorage.getItem('username') || '';
     setUsername(storedUsername);
 
-    const fetchSuggestion = async () => {
+    const fetchProfileAndSuggestion = async () => {
       try {
-        await fetch(`${FASTAPI_URL}/visit`, {
+        const token = localStorage.getItem('token');
+        let userPageCount = 0;
+        if (token) {
+          // Fetch profile to get pageCount
+          const profileRes = await axios.get(`${API_BASE_URL}/api/auth/profile`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          userPageCount = profileRes.data.pageCount || 0;
+          setPageCount(userPageCount);
+        }
+
+        const response = await fetch(GROQ_API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: storedUsername }),
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${GROQ_API_KEY}`,
+          },
+          body: JSON.stringify({
+            messages: [
+              {
+                role: 'system',
+                content: `You are MyMathix, an AI math mentor. The student "${storedUsername}" has visited ${userPageCount} pages in the app. Based on this, suggest which section or topic they should focus on next. Be encouraging and specific.`
+              }
+            ],
+            model: 'llama-3.3-70b-versatile',
+            temperature: 0.7,
+            max_completion_tokens: 256,
+          }),
         });
-        const res = await fetch(`${FASTAPI_URL}/recommendation`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: storedUsername }),
-        });
-        if (!res.ok) throw new Error('API error');
-        const data = await res.json();
-        // Show only the message from the Python FastAPI (LangChain LLM)
-        setSuggestion(data && typeof data.suggestion === 'string' ? data.suggestion : 'No suggestion available.');
+
+        if (!response.ok) throw new Error('API error');
+        const data = await response.json();
+        const aiSuggestion = data.choices?.[0]?.message?.content || 'No suggestion available.';
+        setSuggestion(aiSuggestion);
       } catch (err) {
         setSuggestion('Could not fetch recommendation.');
       } finally {
@@ -37,7 +62,7 @@ const AIRecommendation: React.FC = () => {
       }
     };
 
-    fetchSuggestion();
+    fetchProfileAndSuggestion();
   }, []);
 
   return (
@@ -57,9 +82,7 @@ const AIRecommendation: React.FC = () => {
         username={username}
         navigate={navigate}
         onLogout={() => navigate('/login')}
-        onProfileClick={function (): void {
-          throw new Error('Function not implemented.');
-        }}
+        onProfileClick={() => {}}
       />
       <Box sx={{ marginTop: '100px', padding: 3, display: 'flex', justifyContent: 'center' }}>
         <Paper
